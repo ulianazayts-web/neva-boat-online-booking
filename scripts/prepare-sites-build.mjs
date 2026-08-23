@@ -13,6 +13,12 @@ for (const file of [index, worker, hosting]) {
   if (!existsSync(file)) throw new Error("Missing Sites build input: " + file);
 }
 
+for (const route of ["case", "demo/admin", "demo/instructor"]) {
+  const target = path.join(dist, "client", route);
+  mkdirSync(target, { recursive: true });
+  copyFileSync(index, path.join(target, "index.html"));
+}
+
 mkdirSync(path.join(dist, "server"), { recursive: true });
 mkdirSync(path.join(dist, ".openai"), { recursive: true });
 copyFileSync(worker, path.join(dist, "server", "index.js"));

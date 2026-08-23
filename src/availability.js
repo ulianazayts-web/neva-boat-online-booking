@@ -1,4 +1,5 @@
-import { boats, DEMO_NOW, instructors, shifts } from "./data.js";
+import { boats, instructors, shifts } from "./data.js";
+import { moscowDateKey, moscowNowMinutes } from "./dates.js";
 
 const BUFFER_MINUTES = 30;
 const OPEN_MINUTES = 10 * 60;
@@ -45,7 +46,7 @@ export function allocateBooking({
   duration,
   bookings,
   blocks,
-  now = DEMO_NOW,
+  now = new Date(),
   ignoreId,
 }) {
   const startMinutes = toMinutes(start);
@@ -56,11 +57,10 @@ export function allocateBooking({
   }
 
   const dateStart = new Date(`${date}T00:00:00+03:00`);
-  const todayKey = now.toLocaleDateString("sv-SE", { timeZone: "Europe/Moscow" });
+  const todayKey = moscowDateKey(now);
   if (date < todayKey) return { available: false, reason: "Дата уже прошла" };
   if (date === todayKey) {
-    const candidate = new Date(`${date}T${start}:00+03:00`);
-    if (candidate.getTime() - now.getTime() < 60 * 60 * 1000) {
+    if (startMinutes - moscowNowMinutes(now) < 60) {
       return { available: false, reason: "До начала должно оставаться не меньше часа" };
     }
   }
@@ -129,6 +129,24 @@ export function allocateBooking({
     staffingCommitment: false,
     dateStart,
   };
+}
+
+export function validateResourceBlock({ block, bookings, blocks, ignoreId }) {
+  const start = toMinutes(block.start);
+  const end = toMinutes(block.end);
+  if (!boats.some((boat) => boat.id === block.boatId)) return "Выберите катер";
+  if (end <= start) return "Окончание должно быть позже начала";
+  if (start < OPEN_MINUTES || end > CLOSE_MINUTES) return "Блокировка должна быть в пределах 10:00–22:00";
+  const conflict = bookings.find((booking) => {
+    if (booking.status === "Cancelled" || booking.date !== block.date || booking.boatId !== block.boatId) return false;
+    const bookingStart = toMinutes(booking.start);
+    const bookingEnd = bookingStart + booking.duration * 60;
+    return start < bookingEnd && end > bookingStart;
+  });
+  if (conflict) return `Конфликт с бронью ${conflict.id}: ${conflict.start}–${toTime(toMinutes(conflict.start) + conflict.duration * 60)}`;
+  const blockConflict = blocks.find((item) => item.id !== ignoreId && item.date === block.date && item.boatId === block.boatId && start < toMinutes(item.end) && end > toMinutes(item.start));
+  if (blockConflict) return `Конфликт с блокировкой ${blockConflict.start}–${blockConflict.end}`;
+  return "";
 }
 
 export function getAvailableSlots(params) {

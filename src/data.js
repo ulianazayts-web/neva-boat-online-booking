@@ -1,5 +1,3 @@
-export const DEMO_NOW = new Date("2026-08-23T14:10:00+03:00");
-
 export const boats = [
   { id: "boat-a", name: "Катер A", capacity: 4, note: "Demo" },
   { id: "boat-b", name: "Катер B", capacity: 6, note: "Demo" },
@@ -105,10 +103,3 @@ export const initialBlocks = [
 ];
 
 export const durations = [1, 2, 3, 4];
-
-export const dateOptions = [
-  { value: "2026-08-23", label: "Сегодня, 23 августа" },
-  { value: "2026-08-24", label: "Понедельник, 24 августа" },
-  { value: "2026-08-25", label: "Вторник, 25 августа" },
-  { value: "2026-09-05", label: "Суббота, 5 сентября" },
-];
