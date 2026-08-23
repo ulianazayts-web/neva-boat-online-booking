@@ -358,6 +358,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
   .admin-sidebar { display: none; }
   .admin-content { overflow-x: auto; }
 }
+@media (min-width: 801px) {
+  .hero > img { width: 125%; left: -25%; }
+}
 @media (max-width: 800px) {
   .site-header { height: 76px; padding: 0 20px; grid-template-columns: auto 1fr auto; }
   .site-header--solid { position: sticky; }
